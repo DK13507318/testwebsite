@@ -3,58 +3,651 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dinesh K</title>
-
+    <title>Pitline Operations & Coach Management Master Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body{
-            margin:0;
-            font-family:Arial, sans-serif;
-            background:#0f172a;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            height:100vh;
-            text-align:center;
+        @keyframes urgentBlink {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            50% { transform: scale(1.015); box-shadow: 0 0 14px 5px rgba(239, 68, 68, 0.4); border-color: rgb(239, 68, 68); }
         }
 
-        .card{
-            background:#1e293b;
-            padding:40px;
-            border-radius:15px;
-            width:350px;
-            box-shadow:0 0 20px rgba(0,0,0,.4);
+        .incoming-soon {
+            animation: urgentBlink 1.5s infinite ease-in-out;
+            position: relative;
+            z-index: 10;
+        }
+        
+        .incoming-soon::after {
+            content: '⚠️ NEXT';
+            position: absolute;
+            top: -8px;
+            right: 4px;
+            background: #ef4444;
+            color: white;
+            font-size: 9px;
+            padding: 1px 5px;
+            border-radius: 4px;
+            font-family: sans-serif;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
-        h1{
-            color:#38bdf8;
-        }
-
-        a{
-            display:inline-block;
-            margin-top:20px;
-            padding:10px 20px;
-            background:#38bdf8;
-            color:#000;
-            text-decoration:none;
-            border-radius:8px;
-            font-weight:bold;
-        }
-
-        a:hover{
-            background:white;
-        }
+        /* Color Scheme Definitions mapped to original inputs */
+        .t-22616 { background-color: #f97316; color: #fff; }
+        .t-12647 { background-color: #0891b2; color: #fff; }
+        .t-12674 { background-color: #16a34a; color: #fff; }
+        .t-12680 { background-color: #eab308; color: #000; }
+        .t-16618 { background-color: #2563eb; color: #fff; }
+        .t-12084 { background-color: #dc2626; color: #fff; }
+        .t-06181 { background-color: #db2777; color: #fff; }
+        .t-16614 { background-color: #6366f1; color: #fff; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 text-slate-800 antialiased p-4 md:p-6">
 
-<div class="card">
-    <h1>Hello 👋</h1>
-    <h2>I'm Dinesh K</h2>
-    <p>Welcome to my website.</p>
+<div class="max-w-7xl mx-auto space-y-6">
+    
+    <header class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-5 border-b border-slate-200">
+        <div>
+            <h1 class="text-2xl font-black tracking-wider uppercase text-slate-900">Pitline Operations Control</h1>
+            <p class="text-sm text-slate-500 font-medium">Track Assignment, Maintenance Master Schedule & Coach Verification Dashboard</p>
+        </div>
+        
+        <div class="flex items-center gap-4 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-md font-mono w-full md:w-auto justify-between md:justify-start">
+            <div class="flex flex-col items-center px-2">
+                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">Date</span>
+                <span id="live-date" class="text-sm font-bold tracking-tight">--/--/----</span>
+            </div>
+            <div class="flex flex-col items-center px-4 border-l border-slate-700">
+                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">Standard Time</span>
+                <span id="normal-clock" class="text-base font-bold text-emerald-400">00:00:00 AM</span>
+            </div>
+            <div class="flex flex-col items-center px-2 border-l border-slate-700">
+                <span class="text-[10px] text-slate-400 uppercase tracking-widest mb-0.5">Railway Clock</span>
+                <span id="railway-clock" class="text-base font-bold text-amber-400">00:00:00</span>
+            </div>
+        </div>
+    </header>
 
-    <a href="mailto:example@gmail.com">Contact Me</a>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 rounded-xl p-5 text-white shadow-lg flex items-center justify-between border border-emerald-800/20">
+            <div class="flex items-center gap-4">
+                <div class="bg-emerald-500 text-slate-950 font-extrabold px-3 py-1 rounded text-xs tracking-wider">CURRENT IN PIT</div>
+                <div>
+                    <p class="text-[11px] text-emerald-400 font-semibold uppercase tracking-wider">Active Occupancy Slot</p>
+                    <h3 class="text-xl font-black flex items-center gap-2 mt-0.5">
+                        <span id="current-train-no" class="bg-white/10 px-2 py-0.5 rounded text-sm font-mono tracking-wide">---</span>
+                        <span id="current-train-name" class="text-white font-bold truncate max-w-[220px]">Checking Allocation...</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="text-right hidden sm:block">
+                <span class="text-[11px] text-emerald-400 block uppercase tracking-wider font-semibold">Shift Window</span>
+                <span id="current-train-window" class="text-sm font-bold text-slate-200">---</span>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-slate-900 via-slate-850 to-slate-900 rounded-xl p-5 text-white shadow-lg flex items-center justify-between border border-slate-800">
+            <div class="flex items-center gap-4">
+                <div class="bg-amber-500 text-slate-950 font-extrabold px-3 py-1 rounded text-xs tracking-wider animate-pulse">INBOUND NEXT</div>
+                <div>
+                    <p class="text-[11px] text-amber-400 font-semibold uppercase tracking-wider">Next Target Placement</p>
+                    <h3 class="text-xl font-black flex items-center gap-2 mt-0.5">
+                        <span id="next-train-no" class="bg-white/10 px-2 py-0.5 rounded text-sm font-mono tracking-wide">---</span>
+                        <span id="next-train-name" class="text-amber-300 font-bold truncate max-w-[220px]">Calculating...</span>
+                    </h3>
+                </div>
+            </div>
+            <div class="text-right hidden sm:block">
+                <span class="text-[11px] text-amber-400 block uppercase tracking-wider font-semibold">Target Window</span>
+                <span id="next-train-window" class="text-sm font-bold text-slate-200">---</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-2 space-y-6">
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                    <h2 class="text-lg font-bold text-slate-900 border-l-4 border-slate-800 pl-3">Weekly Rake Placement Matrix</h2>
+                    <span class="text-xs text-slate-500 bg-slate-100 px-2.5 py-1 rounded-md font-medium">💡 Interactive: Click any train slot to queue execution tasks</span>
+                </div>
+                <div class="overflow-x-auto rounded-lg border border-slate-200">
+                    <table class="w-full border-collapse text-center">
+                        <thead>
+                            <tr class="bg-slate-50 text-slate-700 text-xs uppercase tracking-wider font-bold border-b border-slate-200">
+                                <th class="p-3 font-bold w-[16%] border-r border-slate-200">Day / Time</th>
+                                <th class="p-3 font-bold border-r border-slate-200">Night (22-06)</th>
+                                <th class="p-3 font-bold border-r border-slate-200">Morning (06-14)</th>
+                                <th class="p-3 font-bold">Evening (14-22)</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-bold text-sm text-slate-800">
+                            <tr id="row-Sun" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Sun</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-22616" id="cell-Sun-0" onclick="handleTrainClick('22616', 'Sun', '22-06')">22616</div></td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12647" id="cell-Sun-1" onclick="handleTrainClick('12647', 'Sun', '06-14')">12647</div></td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Sun-2" onclick="handleTrainClick('12674', 'Sun', '14-22')">12674</div></td>
+                            </tr>
+                            <tr id="row-Mon" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Mon</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12680" id="cell-Mon-0" onclick="handleTrainClick('12680', 'Mon', '22-06')">12680</div></td>
+                                <td class="p-3 border-r border-slate-200 text-slate-400 font-normal bg-slate-50/50" id="cell-Mon-1">-</td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Mon-2" onclick="handleTrainClick('12674', 'Mon', '14-22')">12674</div></td>
+                            </tr>
+                            <tr id="row-Tue" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Tue</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-16618" id="cell-Tue-0" onclick="handleTrainClick('16618', 'Tue', '22-06')">16618</div></td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Tue-1" onclick="handleTrainClick('12674', 'Tue', '06-14')">12674</div></td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12084" id="cell-Tue-2" onclick="handleTrainClick('12084', 'Tue', '14-22')">12084</div></td>
+                            </tr>
+                            <tr id="row-Wed" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Wed</td>
+                                <td class="p-3 border-r border-slate-200 text-slate-400 font-normal bg-slate-50/50" id="cell-Wed-0">-</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Wed-1" onclick="handleTrainClick('12674', 'Wed', '06-14')">12674</div></td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-06181" id="cell-Wed-2" onclick="handleTrainClick('06181', 'Wed', '14-22')">06181</div></td>
+                            </tr>
+                            <tr id="row-Thu" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Thu</td>
+                                <td class="p-1 border-r border-slate-200" id="cell-Thu-0">
+                                    <div class="flex gap-1 min-h-[44px]">
+                                        <div class="flex-1 flex items-center justify-center rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12680 text-xs px-1" id="cell-Thu-0-A" onclick="handleTrainClick('12680', 'Thu', '22-06')">12680</div>
+                                        <div class="flex-1 flex items-center justify-center rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-22616 text-xs px-1" id="cell-Thu-0-B" onclick="handleTrainClick('22616', 'Thu', '22-06')">22616</div>
+                                    </div>
+                                </td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Thu-1" onclick="handleTrainClick('12674', 'Thu', '06-14')">12674</div></td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-16614" id="cell-Thu-2" onclick="handleTrainClick('16614', 'Thu', '14-22')">16614</div></td>
+                            </tr>
+                            <tr id="row-Fri" class="border-b border-slate-200">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Fri</td>
+                                <td class="p-3 border-r border-slate-200 text-slate-400 font-normal bg-slate-50/50" id="cell-Fri-0">-</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Fri-1" onclick="handleTrainClick('12674', 'Fri', '06-14')">12674</div></td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12647" id="cell-Fri-2" onclick="handleTrainClick('12647', 'Fri', '14-22')">12647</div></td>
+                            </tr>
+                            <tr id="row-Sat">
+                                <td class="bg-slate-50 p-3 text-slate-600 border-r border-slate-200 font-bold">Sat</td>
+                                <td class="p-2 border-r border-slate-200"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12084" id="cell-Sat-0" onclick="handleTrainClick('12084', 'Sat', '22-06')">12084</div></td>
+                                <td class="p-3 border-r border-slate-200 text-slate-400 font-normal bg-slate-50/50" id="cell-Sat-1">-</td>
+                                <td class="p-2"><div class="py-2.5 rounded-lg cursor-pointer hover:opacity-90 active:scale-95 transition-all t-12674" id="cell-Sat-2" onclick="handleTrainClick('12674', 'Sat', '14-22')">12674</div></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <div class="lg:col-span-1 flex flex-col gap-6">
+            
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col h-[280px]">
+                <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                    <h2 class="text-sm font-bold text-slate-900 border-l-4 border-rose-500 pl-2 uppercase tracking-wide">Pitline Task Logs</h2>
+                    <span id="todo-count" class="bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-bold">0 Items</span>
+                </div>
+                
+                <div id="todo-placeholder" class="flex-1 flex flex-col items-center justify-center text-center p-4 text-slate-400 space-y-1">
+                    <svg class="w-8 h-8 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    <p class="text-xs font-semibold text-slate-500">No Active Allocations Logged</p>
+                    <p class="text-[11px] text-slate-400">Select matrix train items to populate workflow checklist tabs.</p>
+                </div>
+
+                <ul id="todo-list" class="space-y-2 flex-1 overflow-y-auto hidden pr-1"></ul>
+                
+                <button id="clear-all-btn" onclick="clearAllTodos()" class="mt-2 w-full bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-bold py-2 rounded-lg transition-colors hidden">
+                    Clear Checked Tasks
+                </button>
+            </section>
+
+            <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 flex flex-col h-[280px]">
+                <div>
+                    <div class="flex justify-between items-center mb-3 pb-2 border-b border-slate-100">
+                        <h2 class="text-sm font-bold text-slate-900 border-l-4 border-blue-600 pl-2 uppercase tracking-wide">Coach Validator</h2>
+                        <span id="listCounter" class="bg-slate-100 text-slate-700 text-xs px-2.5 py-0.5 rounded-full font-bold">0 Active</span>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label for="coachInput" class="text-[10px] font-bold text-slate-500 uppercase tracking-wider block">Verify Coach Code</label>
+                        <div class="flex gap-2">
+                            <input 
+                                type="number" 
+                                id="coachInput" 
+                                placeholder="Ex: 201991" 
+                                class="flex-1 px-3 py-1.5 text-sm bg-slate-50 border border-slate-200 rounded-lg font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                            >
+                            <button 
+                                onclick="checkCoachNumber()" 
+                                class="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors"
+                            >
+                                Check
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="h-8 flex items-center justify-center my-1">
+                        <div id="statusAlert" class="w-full text-center py-1 px-3 rounded-lg font-bold text-xs hidden transition-all duration-300 transform scale-95 opacity-0"></div>
+                    </div>
+                </div>
+
+                <div class="flex-1 border-t border-slate-100 overflow-y-auto mt-1 pt-2">
+                    <ul id="todoList" class="space-y-1.5 pr-1">
+                        <p id="emptyState" class="text-xs text-slate-400 text-center py-4 italic">No verified coaches in tracking array buffer.</p>
+                    </ul>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+        <h2 class="text-lg font-bold text-slate-900 mb-4 border-l-4 border-slate-800 pl-3">Train Rake Master Reference</h2>
+        <div class="overflow-x-auto rounded-lg border border-slate-200">
+            <table class="w-full border-collapse text-left text-sm" id="master-db-table">
+                <thead>
+                    <tr class="bg-slate-800 text-slate-100 text-xs uppercase tracking-wider">
+                        <th class="p-3 font-bold w-[6%] text-center">S.No</th>
+                        <th class="p-3 font-bold w-[12%] text-center">Train No</th>
+                        <th class="p-3 font-bold w-[25%]">Train Nomenclature Name</th>
+                        <th class="p-3 font-bold w-[15%]">Origin Station</th>
+                        <th class="p-3 font-bold w-[15%]">Destination Yard</th>
+                        <th class="p-3 font-bold w-[27%]">Pitline Windows Routine</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 text-slate-700 font-medium">
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="12084">
+                        <td class="p-3 text-center text-slate-400 font-mono">01</td>
+                        <td class="p-3 text-center"><span class="inline-block t-12084 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">12084</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Jan Shatabdi Express</td>
+                        <td class="p-3">Mayiladuturai Jn</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">22–06 (Sat), 14–22 (Tue)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="12647">
+                        <td class="p-3 text-center text-slate-400 font-mono">02</td>
+                        <td class="p-3 text-center"><span class="inline-block t-12647 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">12647</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Kongu Express</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3">Hazrat Nizamuddin</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">06–14 (Sun), 14–22 (Fri)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="12674">
+                        <td class="p-3 text-center text-slate-400 font-mono">03</td>
+                        <td class="p-3 text-center"><span class="inline-block t-12674 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">12674</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Cheran Express</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3">M.G.R. Chennai Central</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">14–22 (Sun, Mon, Sat), 06–14 (Tue, Wed, Thu, Fri)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="12680">
+                        <td class="p-3 text-center text-slate-400 font-mono">04</td>
+                        <td class="p-3 text-center"><span class="inline-block t-12680 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono text-slate-950">12680</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">InterCity SF Express</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3">M.G.R. Chennai Central</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">22–06 (Mon, Thu)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="16614">
+                        <td class="p-3 text-center text-slate-400 font-mono">05</td>
+                        <td class="p-3 text-center"><span class="inline-block t-16614 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">16614</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Rajkot–Ernakulam Express</td>
+                        <td class="p-3">Rajkot Jn</td>
+                        <td class="p-3">Ernakulam Jn</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">14–22 (Thu)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="16618">
+                        <td class="p-3 text-center text-slate-400 font-mono">06</td>
+                        <td class="p-3 text-center"><span class="inline-block t-16618 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">16618</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Rameswaram Express</td>
+                        <td class="p-3">Rameswaram</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">22–06 (Tue)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="22616">
+                        <td class="p-3 text-center text-slate-400 font-mono">07</td>
+                        <td class="p-3 text-center"><span class="inline-block t-22616 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">22616</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Tirupati–Coimbatore Intercity</td>
+                        <td class="p-3">Tirupati</td>
+                        <td class="p-3">Coimbatore Jn</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">22–06 (Sun, Thu)</td>
+                    </tr>
+                    <tr class="hover:bg-slate-50/80 transition-colors" data-train="06181">
+                        <td class="p-3 text-center text-slate-400 font-mono">08</td>
+                        <td class="p-3 text-center"><span class="inline-block t-06181 text-xs font-bold px-2.5 py-0.5 rounded shadow-sm font-mono">06181</span></td>
+                        <td class="p-3 font-bold text-slate-900 train-name">Special/Temporary Train</td>
+                        <td class="p-3">Special</td>
+                        <td class="p-3">Special</td>
+                        <td class="p-3 text-xs text-slate-600 font-semibold">14–22 (Wed)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
 </div>
+
+<script>
+    // ==========================================
+    // DATA CONFIGURATION & GENERAL STATE
+    // ==========================================
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    const shifts = ['22-06', '06-14', '14-22'];
+    
+    const weeklySchedule = {
+        'Sun': ['22616', '12647', '12674'],
+        'Mon': ['12680', '-', '12674'],
+        'Tue': ['16618', '12674', '12084'],
+        'Wed': ['-', '12674', '06181'],
+        'Thu': ['12680', '12674', '16614'], 
+        'Fri': ['-', '12674', '12647'],
+        'Sat': ['12084', '-', '12674']
+    };
+
+    const coachDatabase = [
+        "201991", "201989", "211115", "203770", "203822", 
+        "204192", "212752", "202225", "211787", "213230", 
+        "231200", "203732", "192093", "213222", "202227", 
+        "217093", "202229", "212563", "212746", "211111", 
+        "231209", "231214"
+    ];
+
+    const trainNamesMap = {};
+    document.querySelectorAll('#master-db-table tbody tr').forEach(row => {
+        const trainNo = row.getAttribute('data-train');
+        const nameNode = row.querySelector('.train-name');
+        if (trainNo && nameNode) {
+            trainNamesMap[trainNo] = nameNode.textContent.trim();
+        }
+    });
+
+    // Load Initial State from LocalStorage with clean JSON parsing fallback definitions
+    let todos = JSON.parse(localStorage.getItem('pitline_todos')) || [];
+    let savedCoaches = JSON.parse(localStorage.getItem('pitline_coaches')) || [];
+    let alertTimeout = null;
+
+    // ==========================================
+    // MODULE 1: RAKE MATRIX & PITLINE TO-DO ENGINE
+    // ==========================================
+    function handleTrainClick(trainNo, day, shift) {
+        if(trainNo === '-') return;
+        const trainName = trainNamesMap[trainNo] || "Allocated Special Train";
+        const isDuplicate = todos.some(item => item.trainNo === trainNo && item.day === day && item.shift === shift);
+        if(isDuplicate) return;
+
+        todos.push({
+            id: Date.now(),
+            trainNo: trainNo,
+            trainName: trainName,
+            day: day,
+            shift: shift,
+            completed: false
+        });
+        saveAndRenderTodos();
+    }
+
+    function toggleTodo(id) {
+        todos = todos.map(t => t.id === id ? { ...t, completed: !t.completed } : t);
+        saveAndRenderTodos();
+    }
+
+    function clearAllTodos() {
+        todos = todos.filter(t => !t.completed);
+        saveAndRenderTodos();
+    }
+
+    function saveAndRenderTodos() {
+        localStorage.setItem('pitline_todos', JSON.stringify(todos));
+        renderTodos();
+    }
+
+    function renderTodos() {
+        const listContainer = document.getElementById('todo-list');
+        const placeholder = document.getElementById('todo-placeholder');
+        const countBadge = document.getElementById('todo-count');
+        const clearBtn = document.getElementById('clear-all-btn');
+
+        if(todos.length === 0) {
+            placeholder.classList.remove('hidden');
+            listContainer.classList.add('hidden');
+            clearBtn.classList.add('hidden');
+            countBadge.innerText = "0 Items";
+            return;
+        }
+
+        placeholder.classList.add('hidden');
+        listContainer.classList.remove('hidden');
+        clearBtn.classList.remove('hidden');
+        countBadge.innerText = `${todos.length} Items`;
+
+        listContainer.innerHTML = '';
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = `flex items-start gap-2.5 p-2 rounded-lg border text-xs transition-all ${
+                todo.completed ? 'bg-slate-50 border-slate-200 opacity-50 line-through' : 'bg-white border-slate-200 shadow-sm'
+            }`;
+            
+            li.innerHTML = `
+                <input type="checkbox" ${todo.completed ? 'checked' : ''} onchange="toggleTodo(${todo.id})" class="mt-0.5 w-3.5 h-3.5 rounded text-blue-600 border-slate-300 focus:ring-blue-500 cursor-pointer">
+                <div class="flex-1 min-w-0">
+                    <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                        <span class="inline-block px-1 py-0.2 rounded text-[9px] bg-slate-800 text-white font-mono">${todo.trainNo}</span>
+                        <span class="truncate">${todo.trainName}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Schedule: ${todo.day} Shift Window (${todo.shift})</div>
+                </div>
+            `;
+            listContainer.appendChild(li);
+        });
+    }
+
+    function calculateNextScheduledTrain(currentDayIdx, currentShiftIdx) {
+        let loopDayIdx = currentDayIdx;
+        let loopShiftIdx = currentShiftIdx + 1;
+
+        for (let i = 0; i < 21; i++) {
+            if (loopShiftIdx >= 3) {
+                loopShiftIdx = 0;
+                loopDayIdx = (loopDayIdx + 1) % 7;
+            }
+
+            const dayToken = dayNames[loopDayIdx];
+            const candidateTrain = weeklySchedule[dayToken][loopShiftIdx];
+
+            if (candidateTrain !== '-') {
+                return {
+                    trainNo: candidateTrain,
+                    day: dayToken,
+                    shift: shifts[loopShiftIdx]
+                };
+            }
+            loopShiftIdx++;
+        }
+        return null;
+    }
+
+    function updateClocksAndBlinking() {
+        const now = new Date();
+        
+        const currentDayIdx = now.getDay();
+        const currentDayName = dayNames[currentDayIdx];
+        const dd = String(now.getDate()).padStart(2, '0');
+        const mm = String(now.getMonth() + 1).padStart(2, '0');
+        document.getElementById('live-date').innerText = `${dd}/${mm}/${now.getFullYear()}`;
+
+        let hours12 = now.getHours();
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        const ampm = hours12 >= 12 ? 'PM' : 'AM';
+        hours12 = hours12 % 12 || 12; 
+        document.getElementById('normal-clock').innerText = `${String(hours12).padStart(2, '0')}:${minutes}:${seconds} ${ampm}`;
+
+        document.getElementById('railway-clock').innerText = `${String(now.getHours()).padStart(2, '0')}:${minutes}:${seconds}`;
+
+        dayNames.forEach(day => {
+            const row = document.getElementById(`row-${day}`);
+            if(row) {
+                row.className = (day === currentDayName) 
+                    ? "bg-blue-50/70 border-l-4 border-blue-600 transition-colors duration-150" 
+                    : "hover:bg-slate-50/60 transition-colors duration-150";
+            }
+        });
+
+        let currentHour = now.getHours();
+        let activeShiftIdx = 0; 
+        if (currentHour >= 6 && currentHour < 14) activeShiftIdx = 1;
+        else if (currentHour >= 14 && currentHour < 22) activeShiftIdx = 2;
+
+        const activeTrainNo = weeklySchedule[currentDayName][activeShiftIdx];
+        const currentTrainNoEl = document.getElementById('current-train-no');
+        const currentTrainNameEl = document.getElementById('current-train-name');
+        const currentTrainWindowEl = document.getElementById('current-train-window');
+
+        if (activeTrainNo === '-') {
+            currentTrainNoEl.innerText = "NONE";
+            currentTrainNameEl.innerText = "No Train in Pitline";
+            currentTrainWindowEl.innerText = `${currentDayName} (${shifts[activeShiftIdx]})`;
+        } else {
+            const cleanTrainNo = (currentDayName === 'Thu' && activeShiftIdx === 0) ? '12680' : activeTrainNo;
+            currentTrainNoEl.innerText = cleanTrainNo;
+            currentTrainNameEl.innerText = trainNamesMap[cleanTrainNo] || "Allocated Train";
+            currentTrainWindowEl.innerText = `${currentDayName} (${shifts[activeShiftIdx]})`;
+        }
+
+        const nextTrainObj = calculateNextScheduledTrain(currentDayIdx, activeShiftIdx);
+        if (nextTrainObj) {
+            document.getElementById('next-train-no').innerText = nextTrainObj.trainNo;
+            document.getElementById('next-train-name').innerText = trainNamesMap[nextTrainObj.trainNo] || "Special Allocation";
+            document.getElementById('next-train-window').innerText = `${nextTrainObj.day} (${nextTrainObj.shift})`;
+        }
+
+        document.querySelectorAll('.incoming-soon').forEach(el => el.classList.remove('incoming-soon'));
+        if (currentHour === 5) markSlot(currentDayName, 1);
+        else if (currentHour === 13) markSlot(currentDayName, 2);
+        else if (currentHour === 21) markSlot(currentDayName, 0);
+    }
+
+    function markSlot(day, shiftIndex) {
+        if (day === 'Thu' && shiftIndex === 0) {
+            document.getElementById('cell-Thu-0-A').classList.add('incoming-soon');
+            document.getElementById('cell-Thu-0-B').classList.add('incoming-soon');
+        } else {
+            const cell = document.getElementById(`cell-${day}-${shiftIndex}`);
+            if (cell) {
+                const targetDiv = cell.querySelector('div');
+                if (targetDiv && cell.innerText.trim() !== '-') {
+                    targetDiv.classList.add('incoming-soon');
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // MODULE 2: INTEGRATED COACH NUMBER VALIDATOR
+    // ==========================================
+    function checkCoachNumber() {
+        const inputField = document.getElementById("coachInput");
+        const inputValue = inputField.value.trim();
+
+        if (!inputValue) {
+            showCoachAlert("Please enter a valid number.", "error");
+            return;
+        }
+
+        if (coachDatabase.includes(inputValue)) {
+            showCoachAlert(`✓ Matching: Coach ${inputValue} found!`, "success");
+            addCoachToState(inputValue);
+        } else {
+            showCoachAlert(`✗ Not Matching: ${inputValue} is invalid.`, "error");
+        }
+
+        inputField.value = "";
+        inputField.focus();
+    }
+
+    function showCoachAlert(message, type) {
+        const alertBox = document.getElementById("statusAlert");
+        clearTimeout(alertTimeout);
+
+        alertBox.innerHTML = message;
+        alertBox.classList.remove("hidden", "bg-emerald-50", "text-emerald-700", "border-emerald-200", "bg-rose-50", "text-rose-700", "border-rose-200", "scale-95", "opacity-0");
+
+        if (type === "success") {
+            alertBox.classList.add("bg-emerald-50", "text-emerald-700", "border", "border-emerald-200", "scale-100", "opacity-100");
+        } else {
+            alertBox.classList.add("bg-rose-50", "text-rose-700", "border", "border-rose-200", "scale-100", "opacity-100");
+        }
+
+        alertBox.classList.remove("hidden");
+        alertTimeout = setTimeout(() => {
+            alertBox.classList.add("scale-95", "opacity-0");
+            setTimeout(() => alertBox.classList.add("hidden"), 300);
+        }, 4000);
+    }
+
+    // Added separate buffer update step for LocalStorage sync properties
+    function addCoachToState(coachNum) {
+        if (savedCoaches.includes(coachNum)) return;
+        savedCoaches.push(coachNum);
+        saveAndRenderCoaches();
+    }
+
+    function removeCoachItem(coachNum) {
+        savedCoaches = savedCoaches.filter(c => c !== coachNum);
+        saveAndRenderCoaches();
+    }
+
+    function saveAndRenderCoaches() {
+        localStorage.setItem('pitline_coaches', JSON.stringify(savedCoaches));
+        renderCoaches();
+    }
+
+    function renderCoaches() {
+        const todoList = document.getElementById("todoList");
+        const emptyState = document.getElementById("emptyState");
+        
+        todoList.querySelectorAll("li").forEach(li => li.remove());
+
+        if (savedCoaches.length === 0) {
+            if(emptyState) emptyState.classList.remove("hidden");
+            document.getElementById("listCounter").textContent = `0 Active`;
+            return;
+        }
+
+        if(emptyState) emptyState.classList.add("hidden");
+
+        savedCoaches.forEach(coachNum => {
+            const li = document.createElement("li");
+            li.className = "flex items-center justify-between bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg transition-all hover:bg-slate-100 group text-xs font-mono";
+            
+            li.innerHTML = `
+                <span class="coach-val font-bold text-slate-700"># ${coachNum}</span>
+                <button onclick="removeCoachItem('${coachNum}')" class="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors" title="Delete Verification Log">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                </button>
+            `;
+            todoList.appendChild(li);
+        });
+
+        document.getElementById("listCounter").textContent = `${savedCoaches.length} Saved`;
+    }
+
+    // Keybindings Shortcuts setup
+    document.getElementById("coachInput").addEventListener("keypress", function(event) {
+        if (event.key === "Enter") {
+            checkCoachNumber();
+        }
+    });
+
+    // ==========================================
+    // INITIALIZATION RUNNER
+    // ==========================================
+    window.onload = function() {
+        updateClocksAndBlinking();
+        renderTodos();
+        renderCoaches();
+        setInterval(updateClocksAndBlinking, 1000);
+    };
+</script>
 
 </body>
 </html>
